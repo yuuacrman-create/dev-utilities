@@ -19,3 +19,48 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+import os
+import shutil
+from pathlib import Path
+
+FILE_CATEGORIES = {
+    "Images": [".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp"],
+    "Documents": [".pdf", ".docx", ".txt", ".xlsx", ".pptx", ".csv"],
+    "Archives": [".zip", ".rar", ".tar", ".gz", ".7z"],
+    "Code": [".py", ".js", ".html", ".css", ".json", ".cpp", ".java"],
+    "Media": [".mp4", ".mp3", ".wav", ".mkv", ".mov"]
+}
+
+def organize_directory(target_dir: str):
+    base_path = Path(target_dir)
+    
+    if not base_path.exists() or not base_path.is_dir():
+        print(f"Error: Directory '{target_dir}' does not exist.")
+        return
+
+    moved_count = 0
+
+    for item in base_path.iterdir():
+        if item.is_file():
+            file_ext = item.suffix.lower()
+            destination_folder = "Others"
+
+            for category, extensions in FILE_CATEGORIES.items():
+                if file_ext in extensions:
+                    destination_folder = category
+                    break
+
+            target_folder_path = base_path / destination_folder
+            target_folder_path.mkdir(exist_ok=True)
+
+            try:
+                shutil.move(str(item), str(target_folder_path / item.name))
+                moved_count += 1
+            except Exception as e:
+                print(f"Failed to move {item.name}: {e}")
+
+    print(f"Successfully organized {moved_count} files in '{target_dir}'.")
+
+if __name__ == "__main__":
+    current_directory = os.getcwd()
+    organize_directory(current_directory)
